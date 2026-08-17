@@ -1,4 +1,3 @@
-````php
 <?php
 // LICENSE PROTECTED DEMONSTRATION APPLICATION
 
@@ -431,4 +430,4 @@ setTimeout(function () {
 </body>
 
 </html>
-````
+
