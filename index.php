@@ -5,8 +5,9 @@
 $user_id = "USER001";
 
 // DO NOT CHANGE for the current local XAMPP setup:
-$license_url = "http://localhost/xampp_license_v2/license_check.php";
-
+//$license_url = "http://localhost/xampp_license_v2/license_check.php";
+$license_url =
+    "https://license-commercial-remote.onrender.com/license_check.php";
 function check_license($user_id, $license_url)
 {
     $post_data = http_build_query(["user_id" => $user_id]);
