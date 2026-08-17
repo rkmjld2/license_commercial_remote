@@ -1,99 +1,162 @@
-````php
 <?php
-// LICENSE PROTECTED DEMONSTRATION APPLICATION
 
-// ==========================================================
-// CHANGE THIS for each customer/project
-// ==========================================================
+/*
+===========================================================
+ MAIN APPLICATION
+ index.php
+===========================================================
+*/
+
+
+/* ---------------------------------------------------------
+   CUSTOMER USER ID
+
+   CHANGE THIS FOR EACH CUSTOMER.
+--------------------------------------------------------- */
+
 $user_id = "USER001";
 
 
-// ==========================================================
-// REMOTE LICENSE SERVER
-// ==========================================================
+/* ---------------------------------------------------------
+   REMOTE LICENSE SERVER
+
+   DO NOT CHANGE FOR THIS PROJECT.
+--------------------------------------------------------- */
+
 $license_url =
     "https://license-commercial-remote.onrender.com/license_check.php";
 
 
-// ==========================================================
-// CHECK LICENSE
-// ==========================================================
-function check_license($user_id, $license_url)
-{
-    $post_data = http_build_query([
-        "user_id" => $user_id
-    ]);
+/* ---------------------------------------------------------
+   LICENSE CHECK FUNCTION
+--------------------------------------------------------- */
 
-    $ch = curl_init($license_url);
+function check_license(
+    $user_id,
+    $license_url
+) {
 
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $post_data =
+        http_build_query([
+            "user_id" => $user_id
+        ]);
 
-    // Timeouts
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 
-    // Follow redirects
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    $ch =
+        curl_init($license_url);
 
-    // Request JSON response
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Accept: application/json",
-        "Content-Type: application/x-www-form-urlencoded"
-    ]);
 
-    $response = curl_exec($ch);
+    curl_setopt(
+        $ch,
+        CURLOPT_POST,
+        true
+    );
 
-    // ------------------------------------------------------
-    // cURL ERROR
-    // ------------------------------------------------------
+
+    curl_setopt(
+        $ch,
+        CURLOPT_POSTFIELDS,
+        $post_data
+    );
+
+
+    curl_setopt(
+        $ch,
+        CURLOPT_RETURNTRANSFER,
+        true
+    );
+
+
+    curl_setopt(
+        $ch,
+        CURLOPT_CONNECTTIMEOUT,
+        10
+    );
+
+
+    curl_setopt(
+        $ch,
+        CURLOPT_TIMEOUT,
+        20
+    );
+
+
+    curl_setopt(
+        $ch,
+        CURLOPT_FOLLOWLOCATION,
+        true
+    );
+
+
+    curl_setopt(
+        $ch,
+        CURLOPT_HTTPHEADER,
+        [
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: application/json"
+        ]
+    );
+
+
+    $response =
+        curl_exec($ch);
+
+
     if ($response === false) {
 
-        $error = curl_error($ch);
+        $error =
+            curl_error($ch);
 
         curl_close($ch);
+
 
         return [
             "success" => false,
             "status" => "OFF",
             "message" =>
-                "License server could not be contacted: " .
-                $error
+                "License server could not be contacted: "
+                . $error
         ];
     }
 
 
-    // ------------------------------------------------------
-    // HTTP STATUS
-    // ------------------------------------------------------
     $http_code =
-        curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_getinfo(
+            $ch,
+            CURLINFO_HTTP_CODE
+        );
+
 
     curl_close($ch);
 
 
-    if ($http_code < 200 || $http_code >= 300) {
+    if (
+        $http_code < 200 ||
+        $http_code >= 300
+    ) {
 
         return [
             "success" => false,
             "status" => "OFF",
             "message" =>
-                "License checker returned HTTP " .
-                $http_code
+                "License checker returned HTTP "
+                . $http_code
         ];
     }
 
 
-    // ======================================================
-    // CLEAN LICENSE SERVER RESPONSE
-    // ======================================================
+    /* -----------------------------------------------------
+       CLEAN RESPONSE
+    ----------------------------------------------------- */
 
-    // Remove surrounding whitespace
-    $response = trim($response);
+    $response =
+        trim($response);
 
 
-    // Remove UTF-8 BOM
+    /*
+     * Remove UTF-8 BOM.
+     */
+
     $response =
         preg_replace(
             '/^\xEF\xBB\xBF/',
@@ -102,16 +165,18 @@ function check_license($user_id, $license_url)
         );
 
 
-    // Remove Markdown opening fence if present
+    /*
+     * Remove accidental Markdown fences.
+     */
+
     $response =
         preg_replace(
-            '/^\s*```php\s*/i',
+            '/^```(?:json|php)?\s*/i',
             '',
             $response
         );
 
 
-    // Remove Markdown closing fence if present
     $response =
         preg_replace(
             '/\s*```\s*$/',
@@ -120,54 +185,20 @@ function check_license($user_id, $license_url)
         );
 
 
-    $response = trim($response);
+    $response =
+        trim($response);
 
 
-    // ======================================================
-    // FIND JSON OBJECT
-    //
-    // This protects the application if the remote server
-    // accidentally sends anything before or after the JSON.
-    // ======================================================
-
-    $json_start = strpos($response, "{");
-    $json_end   = strrpos($response, "}");
-
-
-    if (
-        $json_start !== false &&
-        $json_end !== false &&
-        $json_end >= $json_start
-    ) {
-
-        $response =
-            substr(
-                $response,
-                $json_start,
-                $json_end - $json_start + 1
-            );
-    }
-
-
-    // ======================================================
-    // DECODE JSON
-    //
-    // JSON_INVALID_UTF8_SUBSTITUTE prevents an invalid
-    // UTF-8 character from causing the license check to fail.
-    // ======================================================
+    /* -----------------------------------------------------
+       DECODE JSON
+    ----------------------------------------------------- */
 
     $data =
         json_decode(
             $response,
-            true,
-            512,
-            JSON_INVALID_UTF8_SUBSTITUTE
+            true
         );
 
-
-    // ======================================================
-    // JSON ERROR
-    // ======================================================
 
     if (!is_array($data)) {
 
@@ -175,47 +206,24 @@ function check_license($user_id, $license_url)
             "success" => false,
             "status" => "OFF",
             "message" =>
-                "Invalid response from license checker. " .
-                "JSON error: " .
-                json_last_error_msg() .
-                " | HTTP: " .
-                $http_code .
-                " | RESPONSE: " .
-                substr($response, 0, 1000)
+                "Invalid response from license checker. "
+                . "JSON error: "
+                . json_last_error_msg()
+                . " | HTTP: "
+                . $http_code
+                . " | RESPONSE: "
+                . substr($response, 0, 500)
         ];
     }
 
-
-    // ======================================================
-    // BASIC RESPONSE VALIDATION
-    // ======================================================
-
-    if (
-        !isset($data["status"]) ||
-        !isset($data["user_id"])
-    ) {
-
-        return [
-            "success" => false,
-            "status" => "OFF",
-            "message" =>
-                "License server returned JSON, " .
-                "but required license fields are missing."
-        ];
-    }
-
-
-    // ======================================================
-    // RETURN LICENSE INFORMATION
-    // ======================================================
 
     return $data;
 }
 
 
-// ==========================================================
-// CHECK LICENSE NOW
-// ==========================================================
+/* ---------------------------------------------------------
+   CHECK LICENSE
+--------------------------------------------------------- */
 
 $license =
     check_license(
@@ -224,40 +232,45 @@ $license =
     );
 
 
-// ==========================================================
-// AUTHORIZATION
-// ==========================================================
+/* ---------------------------------------------------------
+   AUTHORIZATION
+--------------------------------------------------------- */
 
 $authorized =
     isset($license["status"]) &&
     $license["status"] === "ON";
 
 
-// ==========================================================
-// LICENSE VALUES
-// ==========================================================
+/* ---------------------------------------------------------
+   LICENSE INFORMATION
+--------------------------------------------------------- */
 
 $license_mode =
     $license["license_mode"] ?? "";
+
 
 $used_seconds =
     (int)(
         $license["used_seconds"] ?? 0
     );
 
+
 $remaining_seconds =
-    $license["remaining_seconds"] ?? null;
+    $license["remaining_seconds"]
+    ?? null;
 
 
-// ==========================================================
-// FORMAT TIME
-// ==========================================================
+/* ---------------------------------------------------------
+   FORMAT TIME
+--------------------------------------------------------- */
 
 function format_time($seconds)
 {
+
     if ($seconds === null) {
         return "-";
     }
+
 
     $seconds =
         max(
@@ -265,18 +278,22 @@ function format_time($seconds)
             (int)$seconds
         );
 
+
     $hours =
         floor(
             $seconds / 3600
         );
+
 
     $minutes =
         floor(
             ($seconds % 3600) / 60
         );
 
+
     $seconds =
         $seconds % 60;
+
 
     return sprintf(
         "%02d:%02d:%02d",
@@ -287,12 +304,13 @@ function format_time($seconds)
 }
 
 
-// ==========================================================
-// HTML ESCAPE
-// ==========================================================
+/* ---------------------------------------------------------
+   HTML ESCAPE
+--------------------------------------------------------- */
 
 function h($value)
 {
+
     return htmlspecialchars(
         (string)$value,
         ENT_QUOTES,
@@ -528,17 +546,19 @@ The application cannot be started until the license becomes valid.
 
 <?php endif; ?>
 
-
 </div>
 
 
 <script>
 
-setTimeout(function () {
+setTimeout(
+    function () {
 
-    location.reload();
+        location.reload();
 
-}, 30000);
+    },
+    30000
+);
 
 </script>
 
@@ -546,4 +566,3 @@ setTimeout(function () {
 </body>
 
 </html>
-````
