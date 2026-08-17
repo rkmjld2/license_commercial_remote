@@ -17,9 +17,8 @@ For a new customer/project, normally change ONLY:
 
 $user_id = "USER001";
 
-$license_url =
-    "http://localhost/xampp_license_v2/license_check.php";
 
+$license_url = "https://license-commercial-remote.onrender.com/license_check.php";
 
 /* Send license request */
 
