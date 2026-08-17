@@ -99,18 +99,18 @@ function check_license($user_id, $license_url)
      * "Invalid response from license checker."
      */
 
-    if (!is_array($data)) {
+   if (!is_array($data)) {
 
-        $json_error = json_last_error_msg();
-
-        return [
-            "success" => false,
-            "status" => "OFF",
-            "message" =>
-                "Invalid response from license checker. " .
-                "JSON error: " . $json_error
-        ];
-    }
+    return [
+        "success" => false,
+        "status" => "OFF",
+        "message" =>
+            "Invalid response from license checker. " .
+            "JSON error: " . json_last_error_msg() .
+            " | HTTP: " . $http_code .
+            " | RESPONSE: " . substr($response, 0, 500)
+    ];
+}
 
 
     return $data;
