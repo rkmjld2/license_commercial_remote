@@ -1,60 +1,59 @@
+```php
 <?php
+require_once __DIR__ . "/license_guard.php";
 
-/*
-===========================================================
- PAYROLL DEMONSTRATION MODULE
-===========================================================
-*/
+$basic = 0;
+$da = 0;
+$da_amount = 0;
+$total = 0;
 
-require_once "license_guard.php";
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
+    $basic = (float)($_POST["basic"] ?? 0);
+    $da = (float)($_POST["da"] ?? 0);
+
+    $da_amount = $basic * $da / 100;
+    $total = $basic + $da_amount;
+}
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
 
 <meta charset="UTF-8">
 
-<title>
-Payroll
-</title>
+<title>Payroll</title>
 
 <style>
 
 body{
-    font-family:Arial,sans-serif;
+    font-family:Arial;
     text-align:center;
     background:#f2f2f2;
-    padding:40px;
+    padding:30px;
 }
 
 .box{
-    background:white;
-    padding:30px;
     max-width:600px;
     margin:auto;
-    border-radius:10px;
+    background:white;
+    padding:25px;
+    border-radius:12px;
     box-shadow:0 0 10px #aaa;
 }
 
-h1{
-    color:#000;
+input,button{
+    padding:9px;
+    margin:7px;
+}
+
+button{
+    cursor:pointer;
 }
 
 a{
-    display:inline-block;
-    margin-top:20px;
-    padding:12px 20px;
-    background:#eee;
-    border:1px solid #ccc;
-    border-radius:6px;
-    text-decoration:none;
-    color:black;
-}
-
-a:hover{
-    background:#ddd;
+    display:block;
+    margin:20px;
 }
 
 </style>
@@ -65,17 +64,60 @@ a:hover{
 
 <div class="box">
 
-<h1>
-PAYROLL
-</h1>
+<h1>PAYROLL</h1>
+
+<p>Real Application Demonstration</p>
+
+<form method="post">
+
+Basic Pay<br>
+
+<input
+    type="number"
+    step="0.01"
+    name="basic"
+    required
+>
+
+<br>
+
+DA %<br>
+
+<input
+    type="number"
+    step="0.01"
+    name="da"
+    required
+>
+
+<br>
+
+<button type="submit">
+CALCULATE PAY
+</button>
+
+</form>
+
+<?php if ($_SERVER["REQUEST_METHOD"] === "POST"): ?>
+
+<hr>
 
 <p>
-Payroll demonstration module is running.
+<strong>Basic Pay:</strong>
+<?= number_format($basic, 2) ?>
 </p>
 
 <p>
-This page is protected by license_guard.php.
+<strong>DA Amount:</strong>
+<?= number_format($da_amount, 2) ?>
 </p>
+
+<h3>
+Total Pay:
+<?= number_format($total, 2) ?>
+</h3>
+
+<?php endif; ?>
 
 <a href="index.php">
 Back to Main Application
@@ -84,5 +126,5 @@ Back to Main Application
 </div>
 
 </body>
-
 </html>
+```
