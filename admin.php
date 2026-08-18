@@ -1,5 +1,20 @@
 <?php
+
+/*
+===========================================================
+ LICENSE ADMIN V2
+===========================================================
+*/
+
+date_default_timezone_set("Asia/Kolkata");
+
 require_once 'db.php';
+
+/*
+ * Set database session timezone to Indian Standard Time.
+ */
+$conn->query("SET time_zone = '+05:30'");
+
 
 $user_id = $_POST['user_id'] ?? $_GET['user_id'] ?? 'USER001';
 $message = '';
@@ -230,15 +245,9 @@ if (!$license) {
 
 
 /*
- * THIS IS THE IMPORTANT CORRECTION.
- *
- * Your database column is:
+ * Database column:
  *
  *     license_mode
- *
- * not:
- *
- *     mode
  */
 
 $current_mode = $license['license_mode'];
