@@ -1,5 +1,7 @@
 <?php
+
 date_default_timezone_set("Asia/Kolkata");
+
 /*
 ===========================================================
  COMMERCIAL LICENSE SERVER
@@ -35,6 +37,14 @@ header("Content-Type: application/json; charset=UTF-8");
 --------------------------------------------------------- */
 
 require_once "db.php";
+
+/*
+ * Set database session timezone to Indian Standard Time.
+ *
+ * This makes NOW() and DATE_ADD(NOW(), ...)
+ * use IST for this database connection.
+ */
+$conn->query("SET time_zone = '+05:30'");
 
 
 /* ---------------------------------------------------------
